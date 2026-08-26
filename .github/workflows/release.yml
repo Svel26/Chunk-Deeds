@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag (e.g. v1.0.0)"
+        description: "Release tag (e.g. v0.1.0-beta.1)"
         required: false
 
 permissions:
@@ -29,13 +29,13 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - name: Set up Gradle cache
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Extract tag metadata
+      - name: Extract Tag Metadata
         id: metadata
         shell: bash
         run: |
@@ -47,53 +47,10 @@ jobs:
           echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
           echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
 
-      - name: Build
-        run: ./gradlew clean build -Pmod_version="${{ steps.metadata.outputs.version }}" --no-daemon
-
-      - name: Create or update GitHub release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.metadata.outputs.tag }}
-          name: Chunk Deeds v${{ steps.metadata.outputs.version }}
-          generate_release_notes: true
-          files: |
-            build/libs/*.jar
-
-      - name: Resolve Modrinth config
-        id: modrinth_config
-        shell: bash
+      - name: Publish Mod (GitHub Releases & Modrinth)
+        run: ./gradlew publishMods -Pmod_version="${{ steps.metadata.outputs.version }}" --no-daemon
         env:
-          MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-        run: |
-          if [ -n "${MODRINTH_PROJECT_ID}" ] && [ -n "${MODRINTH_TOKEN}" ]; then
-            echo "enabled=true" >> "${GITHUB_OUTPUT}"
-            echo "project_id=${MODRINTH_PROJECT_ID}" >> "${GITHUB_OUTPUT}"
-          else
-            echo "enabled=false" >> "${GITHUB_OUTPUT}"
-            echo "project_id=" >> "${GITHUB_OUTPUT}"
-          fi
+          MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID || secrets.MODRINTH_PROJECT_ID }}
 
-      - name: Publish to Modrinth
-        if: ${{ steps.modrinth_config.outputs.enabled == 'true' }}
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          modrinth-id: ${{ steps.modrinth_config.outputs.project_id }}
-          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-          files: |
-            build/libs/!(*-@(dev|sources|javadoc)).jar
-            build/libs/*-@(dev|sources|javadoc).jar
-          name: Chunk Deeds ${{ steps.metadata.outputs.version }}
-          version: ${{ steps.metadata.outputs.version }}
-          version-type: release
-          changelog-file: CHANGELOG.md
-          loaders: |
-            fabric
-          game-versions: |
-            1.21.1
-          java: |
-            21
-
-      - name: Skip Modrinth publish (missing credentials)
-        if: ${{ steps.modrinth_config.outputs.enabled != 'true' }}
-        run: echo "::notice::Skipping Modrinth publish because MODRINTH_TOKEN and MODRINTH_PROJECT_ID are not fully configured."

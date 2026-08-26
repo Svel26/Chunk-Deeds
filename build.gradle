@@ -1,6 +1,7 @@
 plugins {
     id 'fabric-loom' version '1.7-SNAPSHOT'
     id 'maven-publish'
+    id 'me.modmuss50.mod-publish-plugin' version '2.2.0'
 }
 
 def getModVersion() {
@@ -96,3 +97,56 @@ jar {
         rename { "${it}_${project.base.archivesName.get()}"}
     }
 }
+
+def getReleaseChangelog() {
+    def changelogFile = rootProject.file("CHANGELOG.md")
+    if (!changelogFile.exists()) {
+        return "No changelog provided."
+    }
+    def text = changelogFile.text
+    def versionStr = project.version.toString()
+    def pattern = java.util.regex.Pattern.compile(/(?ms)^##\s+\[${java.util.regex.Pattern.quote(versionStr)}\][^\n]*\n(.*?)(?=^##\s+\[|\Z)/)
+    def matcher = pattern.matcher(text)
+    if (matcher.find()) {
+        def section = matcher.group(1).trim()
+        if (!section.isEmpty()) {
+            return section
+        }
+    }
+    return "Chunk Deeds v${project.version}"
+}
+
+publishMods {
+    file = remapJar.archiveFile
+    additionalFiles.from(sourcesJar.archiveFile)
+    displayName = "Chunk Deeds v${project.version}"
+    version = "${project.version}"
+    changelog = getReleaseChangelog()
+    type = project.version.toString().contains("-alpha") ? ALPHA : (project.version.toString().contains("-beta") || project.version.toString().contains("-rc") ? BETA : STABLE)
+    modLoaders.add("fabric")
+
+    dryRun = providers.environmentVariable("PUBLISH_DRY_RUN").isPresent() || providers.environmentVariable("GITHUB_TOKEN").orNull == null
+
+    def modrinthToken = providers.environmentVariable("MODRINTH_TOKEN")
+    def modrinthProjectId = providers.environmentVariable("MODRINTH_PROJECT_ID")
+
+    if (modrinthToken.isPresent() && modrinthProjectId.isPresent()) {
+        modrinth {
+            projectId = modrinthProjectId
+            accessToken = modrinthToken
+            minecraftVersions.add(project.minecraft_version)
+            requires("fabric-api")
+        }
+    }
+
+    def githubToken = providers.environmentVariable("GITHUB_TOKEN")
+    if (githubToken.isPresent()) {
+        github {
+            repository = "Svel26/Chunk-Deeds"
+            accessToken = githubToken
+            commitish = "main"
+            tagName = "v${project.version}"
+        }
+    }
+}
+
