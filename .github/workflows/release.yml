@@ -38,6 +38,9 @@ jobs:
       - name: Extract Tag Metadata
         id: metadata
         shell: bash
+        env:
+          VARS_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+          SECRETS_PROJECT_ID: ${{ secrets.MODRINTH_PROJECT_ID }}
         run: |
           TAG="${{ github.event.inputs.tag }}"
           if [ -z "${TAG}" ]; then
@@ -47,10 +50,14 @@ jobs:
           echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
           echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
 
+          PROJECT_ID="${VARS_PROJECT_ID:-$SECRETS_PROJECT_ID}"
+          echo "project_id=${PROJECT_ID}" >> "${GITHUB_OUTPUT}"
+
       - name: Publish Mod (GitHub Releases & Modrinth)
         run: ./gradlew publishMods updateModrinthDescription -Pmod_version="${{ steps.metadata.outputs.version }}" --no-daemon
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-          MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID || secrets.MODRINTH_PROJECT_ID }}
+          MODRINTH_PROJECT_ID: ${{ steps.metadata.outputs.project_id }}
+
 
