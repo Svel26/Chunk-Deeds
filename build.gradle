@@ -150,3 +150,39 @@ publishMods {
     }
 }
 
+tasks.register("updateModrinthDescription") {
+    group = "publishing"
+    description = "Syncs README.md to the Modrinth project description"
+    doLast {
+        def token = providers.environmentVariable("MODRINTH_TOKEN").orNull
+        def projectId = providers.environmentVariable("MODRINTH_PROJECT_ID").orNull
+        if (!token || !projectId) {
+            println "Skipping Modrinth description sync: MODRINTH_TOKEN or MODRINTH_PROJECT_ID not set."
+            return
+        }
+        def readmeFile = rootProject.file("README.md")
+        if (!readmeFile.exists()) {
+            println "Skipping Modrinth description sync: README.md not found."
+            return
+        }
+        def readmeText = readmeFile.text
+        def jsonPayload = groovy.json.JsonOutput.toJson([body: readmeText])
+
+        def connection = new URI("https://api.modrinth.com/v2/project/${projectId}").toURL().openConnection() as HttpURLConnection
+        connection.requestMethod = "PATCH"
+        connection.setRequestProperty("Authorization", token)
+        connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+        connection.setRequestProperty("User-Agent", "Svel26/${project.archives_base_name}/${project.version}")
+        connection.doOutput = true
+        connection.outputStream.withWriter("UTF-8") { it.write(jsonPayload) }
+
+        def responseCode = connection.responseCode
+        if (responseCode >= 200 && responseCode < 300) {
+            println "Successfully updated Modrinth project description from README.md"
+        } else {
+            def error = connection.errorStream ? connection.errorStream.text : connection.responseMessage
+            System.err.println "Failed to update Modrinth description (HTTP ${responseCode}): ${error}"
+        }
+    }
+}
+

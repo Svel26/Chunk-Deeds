@@ -48,7 +48,7 @@ jobs:
           echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
 
       - name: Publish Mod (GitHub Releases & Modrinth)
-        run: ./gradlew publishMods -Pmod_version="${{ steps.metadata.outputs.version }}" --no-daemon
+        run: ./gradlew publishMods updateModrinthDescription -Pmod_version="${{ steps.metadata.outputs.version }}" --no-daemon
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
