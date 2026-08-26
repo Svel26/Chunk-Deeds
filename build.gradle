@@ -128,9 +128,9 @@ publishMods {
     dryRun = providers.environmentVariable("PUBLISH_DRY_RUN").isPresent() || providers.environmentVariable("GITHUB_TOKEN").orNull == null
 
     def modrinthToken = providers.environmentVariable("MODRINTH_TOKEN")
-    def modrinthProjectId = providers.environmentVariable("MODRINTH_PROJECT_ID")
+    def modrinthProjectId = providers.environmentVariable("MODRINTH_PROJECT_ID").orElse(project.hasProperty("modrinth_id") ? project.property("modrinth_id").toString() : "")
 
-    if (modrinthToken.isPresent() && modrinthProjectId.isPresent()) {
+    if (modrinthToken.isPresent() && !modrinthProjectId.get().isEmpty()) {
         modrinth {
             projectId = modrinthProjectId
             accessToken = modrinthToken
@@ -155,9 +155,9 @@ tasks.register("updateModrinthDescription") {
     description = "Syncs README.md to the Modrinth project description"
     doLast {
         def token = providers.environmentVariable("MODRINTH_TOKEN").orNull
-        def projectId = providers.environmentVariable("MODRINTH_PROJECT_ID").orNull
+        def projectId = providers.environmentVariable("MODRINTH_PROJECT_ID").orElse(project.hasProperty("modrinth_id") ? project.property("modrinth_id").toString() : "").get()
         if (!token || !projectId) {
-            println "Skipping Modrinth description sync: MODRINTH_TOKEN or MODRINTH_PROJECT_ID not set."
+            println "Skipping Modrinth description sync: MODRINTH_TOKEN or modrinth_id not set."
             return
         }
         def readmeFile = rootProject.file("README.md")
