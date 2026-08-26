@@ -8,7 +8,11 @@ import com.cinecraft.chunkdeeds.item.ModItems;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
+import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
+import mezz.jei.api.ingredients.subtypes.UidContext;
+import mezz.jei.api.registration.IExtraIngredientRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.CraftingRecipe;
@@ -30,6 +34,57 @@ public class ChunkDeedsJeiPlugin implements IModPlugin {
     @Override
     public Identifier getPluginUid() {
         return PLUGIN_UID;
+    }
+
+    @Override
+    public void registerItemSubtypes(ISubtypeRegistration registration) {
+        registration.registerSubtypeInterpreter(ModItems.CLAIM_DEED, new ISubtypeInterpreter<ItemStack>() {
+            @Override
+            public Object getSubtypeData(ItemStack ingredient, UidContext context) {
+                return ClaimDeedItem.getDeedValue(ingredient);
+            }
+
+            @Override
+            public String getLegacyStringSubtypeInfo(ItemStack ingredient, UidContext context) {
+                return String.valueOf(ClaimDeedItem.getDeedValue(ingredient));
+            }
+        });
+
+        registration.registerSubtypeInterpreter(ModItems.FORCELOAD_DEED, new ISubtypeInterpreter<ItemStack>() {
+            @Override
+            public Object getSubtypeData(ItemStack ingredient, UidContext context) {
+                return ForceLoadDeedItem.getDeedValue(ingredient);
+            }
+
+            @Override
+            public String getLegacyStringSubtypeInfo(ItemStack ingredient, UidContext context) {
+                return String.valueOf(ForceLoadDeedItem.getDeedValue(ingredient));
+            }
+        });
+    }
+
+    @Override
+    public void registerExtraIngredients(IExtraIngredientRegistration registration) {
+        ChunkDeedsConfig config = ChunkDeedsConfig.get();
+        List<ItemStack> extra = new ArrayList<>();
+
+        if (config.claimDeed.enabled) {
+            int max = Math.min(8, config.claimDeed.maxDeedValue);
+            for (int i = 1; i <= max; i++) {
+                extra.add(ClaimDeedItem.createStack(i * Math.max(1, config.claimDeed.chunksPerItem)));
+            }
+        }
+
+        if (config.forceLoadDeed.enabled) {
+            int max = Math.min(8, config.forceLoadDeed.maxDeedValue);
+            for (int i = 1; i <= max; i++) {
+                extra.add(ForceLoadDeedItem.createStack(i * Math.max(1, config.forceLoadDeed.chunksPerItem)));
+            }
+        }
+
+        if (!extra.isEmpty()) {
+            registration.addExtraItemStacks(extra);
+        }
     }
 
     @Override
@@ -56,14 +111,21 @@ public class ChunkDeedsJeiPlugin implements IModPlugin {
                 recipes.add(new RecipeEntry<>(ChunkDeedsMod.id("jei_claim_deed_" + count), recipe));
             }
 
-            // Upgrading example in JEI if enabled
+            // Upgrading examples in JEI if enabled
             if (config.general.allowDeedUpgrades && maxDeedValue >= 2) {
-                DefaultedList<Ingredient> upgradeIngredients = DefaultedList.of();
-                upgradeIngredients.add(Ingredient.ofStacks(ClaimDeedItem.createStack(1)));
-                upgradeIngredients.add(Ingredient.ofItems(claimMod));
-                ItemStack upgradeResult = ClaimDeedItem.createStack(1 + chunksPerItem);
-                ShapelessRecipe upgradeRecipe = new ShapelessRecipe("chunkdeeds_claims_upgrade", CraftingRecipeCategory.MISC, upgradeResult, upgradeIngredients);
-                recipes.add(new RecipeEntry<>(ChunkDeedsMod.id("jei_claim_deed_upgrade"), upgradeRecipe));
+                for (int baseCount = 1; baseCount < maxDeedValue; baseCount++) {
+                    int baseVal = baseCount * chunksPerItem;
+                    int addCount = 1;
+                    int targetVal = baseVal + (addCount * chunksPerItem);
+                    if (targetVal <= maxDeedValue * chunksPerItem) {
+                        DefaultedList<Ingredient> upgradeIngredients = DefaultedList.of();
+                        upgradeIngredients.add(Ingredient.ofStacks(ClaimDeedItem.createStack(baseVal)));
+                        upgradeIngredients.add(Ingredient.ofItems(claimMod));
+                        ItemStack upgradeResult = ClaimDeedItem.createStack(targetVal);
+                        ShapelessRecipe upgradeRecipe = new ShapelessRecipe("chunkdeeds_claims_upgrade", CraftingRecipeCategory.MISC, upgradeResult, upgradeIngredients);
+                        recipes.add(new RecipeEntry<>(ChunkDeedsMod.id("jei_claim_deed_upgrade_" + baseVal), upgradeRecipe));
+                    }
+                }
             }
         }
 
@@ -87,12 +149,19 @@ public class ChunkDeedsJeiPlugin implements IModPlugin {
             }
 
             if (config.general.allowDeedUpgrades && maxDeedValue >= 2) {
-                DefaultedList<Ingredient> upgradeIngredients = DefaultedList.of();
-                upgradeIngredients.add(Ingredient.ofStacks(ForceLoadDeedItem.createStack(1)));
-                upgradeIngredients.add(Ingredient.ofItems(forceMod));
-                ItemStack upgradeResult = ForceLoadDeedItem.createStack(1 + chunksPerItem);
-                ShapelessRecipe upgradeRecipe = new ShapelessRecipe("chunkdeeds_forceload_upgrade", CraftingRecipeCategory.MISC, upgradeResult, upgradeIngredients);
-                recipes.add(new RecipeEntry<>(ChunkDeedsMod.id("jei_forceload_deed_upgrade"), upgradeRecipe));
+                for (int baseCount = 1; baseCount < maxDeedValue; baseCount++) {
+                    int baseVal = baseCount * chunksPerItem;
+                    int addCount = 1;
+                    int targetVal = baseVal + (addCount * chunksPerItem);
+                    if (targetVal <= maxDeedValue * chunksPerItem) {
+                        DefaultedList<Ingredient> upgradeIngredients = DefaultedList.of();
+                        upgradeIngredients.add(Ingredient.ofStacks(ForceLoadDeedItem.createStack(baseVal)));
+                        upgradeIngredients.add(Ingredient.ofItems(forceMod));
+                        ItemStack upgradeResult = ForceLoadDeedItem.createStack(targetVal);
+                        ShapelessRecipe upgradeRecipe = new ShapelessRecipe("chunkdeeds_forceload_upgrade", CraftingRecipeCategory.MISC, upgradeResult, upgradeIngredients);
+                        recipes.add(new RecipeEntry<>(ChunkDeedsMod.id("jei_forceload_deed_upgrade_" + baseVal), upgradeRecipe));
+                    }
+                }
             }
         }
 

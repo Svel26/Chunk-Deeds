@@ -17,7 +17,13 @@
     "main": [
       "com.cinecraft.chunkdeeds.ChunkDeedsMod"
     ],
+    "jei_mod_plugin": [
+      "com.cinecraft.chunkdeeds.integration.jei.ChunkDeedsJeiPlugin"
+    ],
     "jei_plugins": [
+      "com.cinecraft.chunkdeeds.integration.jei.ChunkDeedsJeiPlugin"
+    ],
+    "jei": [
       "com.cinecraft.chunkdeeds.integration.jei.ChunkDeedsJeiPlugin"
     ]
   },
