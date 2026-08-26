@@ -1,0 +1,50 @@
+# Gradle / Build
+.gradle/
+build/
+bin/
+out/
+gradle-app.setting
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Fabric Loom / Minecraft Run Directories & Logs
+run/
+run-client/
+run-server/
+*.log
+logs/
+crash-reports/
+debug.log
+
+# Fabric Loom mapping and cache
+.loom-cache/
+.local-fabric/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+.metadata/
+bin/
+*.launch
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# OS specific files
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.bak
+
+# Packaging / Java Archives produced locally (unless tracked in repo)
+*.class

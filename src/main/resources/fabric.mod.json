@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "chunkdeeds",
+  "version": "${version}",
+  "name": "Chunk Deeds",
+  "description": "Craftable dynamic Deeds to expand FTB Chunks claim and force-load limits with configurable recipes and redemption mechanics.",
+  "authors": [
+    "CineCraft"
+  ],
+  "contact": {
+    "homepage": "https://cinecraft.org"
+  },
+  "license": "MIT",
+  "icon": "assets/chunkdeeds/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.cinecraft.chunkdeeds.ChunkDeedsMod"
+    ],
+    "jei_plugins": [
+      "com.cinecraft.chunkdeeds.integration.jei.ChunkDeedsJeiPlugin"
+    ]
+  },
+  "mixins": [],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "cloth-config": ">=15.0.0",
+    "ftb-chunks": ">=2101.1.0",
+    "ftb-teams": ">=2101.1.0",
+    "jei": ">=19.0.0"
+  }
+}

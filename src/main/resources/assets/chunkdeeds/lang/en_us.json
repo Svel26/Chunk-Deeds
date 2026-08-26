@@ -1,0 +1,21 @@
+{
+  "item.chunkdeeds.claim_deed": "Claim Deed",
+  "item.chunkdeeds.forceload_deed": "Force Load Deed",
+  "tooltip.chunkdeeds.grants_claims": "✦ Grants: +%d Extra Claim Chunks",
+  "tooltip.chunkdeeds.grants_forceload": "✦ Grants: +%d Extra Force-Loaded Chunks",
+  "tooltip.chunkdeeds.redeem_instruction": "Right-click to expand your FTB Chunks limit",
+  "message.chunkdeeds.redeemed_claims": "✦ Redeemed Claim Deed! +%d claim chunks added. (Total Extra: %d)",
+  "message.chunkdeeds.redeemed_forceload": "✦ Redeemed Force Load Deed! +%d force load chunks added. (Total Extra: %d)",
+  "message.chunkdeeds.deed_disabled": "This Deed type has been disabled in the server configuration.",
+  "message.chunkdeeds.ftb_not_found": "FTB Chunks is not available on this server.",
+  "message.chunkdeeds.cap_reached_claims": "Cannot redeem: Extra claim limit reached (%d/%d).",
+  "message.chunkdeeds.cap_reached_forceload": "Cannot redeem: Extra force load limit reached (%d/%d).",
+  "message.chunkdeeds.redeem_failed": "Failed to redeem Deed. Please check with a server admin.",
+  "command.chunkdeeds.reload_success": "[ChunkDeeds] Configuration reloaded successfully.",
+  "command.chunkdeeds.player_only": "This command can only be run by a player.",
+  "command.chunkdeeds.invalid_type": "Invalid deed type! Use 'claim' or 'forceload'.",
+  "command.chunkdeeds.received": "You received %dx %s (+%d Chunks)!",
+  "command.chunkdeeds.given": "Gave %dx %s Deed (+%d) to %d player(s).",
+  "jei.chunkdeeds.claim_deed.info": "Craft with Paper and 1 to 8 Diamonds. Each Diamond adds extra Chunk Claims to the Deed. Right-click the Deed in hand to redeem it and expand your FTB Chunks claim limit. You can also upgrade existing Deeds in the crafting table by adding more Diamonds!",
+  "jei.chunkdeeds.forceload_deed.info": "Craft with Paper and 1 to 8 Netherite Scraps. Each Scrap adds extra Force-Loaded Chunks to the Deed. Right-click the Deed in hand to redeem it and expand your FTB Chunks force-load limit. You can also upgrade existing Deeds in the crafting table by adding more Netherite Scraps!"
+}

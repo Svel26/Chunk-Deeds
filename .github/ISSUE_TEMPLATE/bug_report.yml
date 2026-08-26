@@ -1,0 +1,41 @@
+name: Bug Report
+description: Create a report to help us improve Chunk Deeds.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Craft a Claim Deed with 3 diamonds
+        2. Right click to redeem
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Minecraft version, Fabric Loader version, FTB Chunks version.
+      placeholder: "Minecraft 1.21.1, Fabric Loader 0.16.9, FTB Chunks 2101.1.21"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Log Output
+      description: Please copy and paste any relevant log output or crash reports.
+      render: shell
